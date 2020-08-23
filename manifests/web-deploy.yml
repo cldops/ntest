@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+        - name: web
+          image: cldops/ntestweb:latest
+          ports:
+            - containerPort: 3000
+          env:
+          - name: API_HOST
+            value: "http://api:3000"

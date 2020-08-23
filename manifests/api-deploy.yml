@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: api
+  template:
+    metadata:
+      labels:
+        app: api
+    spec:
+      containers:
+        - name: api
+          image: cldops/ntestapi:latest
+          ports:
+            - containerPort: 3000
+          env:
+          - name: DB
+            value: "postgres://postgres:mY_seCret@postgres:5432/postgres"
