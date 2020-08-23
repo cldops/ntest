@@ -13,7 +13,6 @@ phases:
 
   pre_build:
     commands:
-      - docker info
       - TAG="$(date +%Y-%m-%d.%H.%M.%S).$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | head -c 8)"
       - echo "updating image details to the deployment file"
       - sed -i 's@CONTAINER_IMAGE@'"$REPOSITORY_URIONE:$TAG"'@' ./manifests/api-deploy.yml
@@ -30,6 +29,7 @@ phases:
       - cd ../web
       - docker build . -t $REPOSITORY_URITWO:$TAG
       - docker tag $REPOSITORY_URITWO:$TAG $REPOSITORY_URITWO:latest
+      - cd ..
 
   post_build:
     commands:
@@ -39,9 +39,9 @@ phases:
       - docker push $REPOSITORY_URIONE:latest
       - docker push $REPOSITORY_URITWO:$TAG
       - docker push $REPOSITORY_URITWO:latest
+      - echo "Following command will update the $EKS_CLUSTER_NAME cluster info to kube config file"
+      - aws eks update-kubeconfig --region $AWS_REGION --name $EKS_CLUSTER_NAME
       - cat manifests/api-deploy.yml
-##      - echo "Following command will update the $EKS_CLUSTER_NAME cluster info to kube config file"
-##      - aws eks update-kubeconfig --region $AWS_REGION --name $EKS_CLUSTER_NAME
-##      - kubectl apply -f manifests/secret.yml -f manifests/postgres-aws.yml
-##      - kubectl apply -f manifests/api-svc.yml -f manifests/web-svc.yml -f manifests/api-deploy.yml -f manifests/web-deploy.yml
+#      - kubectl apply -f manifests/secret.yml -f manifests/postgres-aws.yml
+#      - kubectl apply -f manifests/api-svc.yml -f manifests/web-svc.yml -f manifests/api-deploy.yml -f manifests/web-deploy.yml
 ...
