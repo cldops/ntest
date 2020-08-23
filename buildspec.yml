@@ -38,8 +38,9 @@ phases:
       - docker push $REPOSITORY_URIONE:latest
       - docker push $REPOSITORY_URITWO:$TAG
       - docker push $REPOSITORY_URITWO:latest
+      - cat manifests/api-deploy.yml
 ##      - echo "Following command will update the $EKS_CLUSTER_NAME cluster info to kube config file"
 ##      - aws eks update-kubeconfig --region $AWS_REGION --name $EKS_CLUSTER_NAME
-      - kubectl apply -f manifests/secret.yml -f manifests/postgres-aws.yml
-      - kubectl apply -f manifests/api-svc.yml -f manifests/web-svc.yml -f manifests/api-deploy.yml -f manifests/web-deploy.yml
+##      - kubectl apply -f manifests/secret.yml -f manifests/postgres-aws.yml
+##      - kubectl apply -f manifests/api-svc.yml -f manifests/web-svc.yml -f manifests/api-deploy.yml -f manifests/web-deploy.yml
 ...
