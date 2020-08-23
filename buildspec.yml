@@ -1,0 +1,45 @@
+---
+version: 0.2
+phases:
+  install:
+    runtime-versions:
+      java: openjdk8
+    commands:
+      - curl -sS -o aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.10.3/2018-07-26/bin/linux/amd64/aws-iam-authenticator
+      - curl -sS -o kubectl https://amazon-eks.s3-us-west-2.amazonaws.com/1.14.6/2019-08-22/bin/linux/amd64/kubectl
+      - chmod +x ./kubectl ./aws-iam-authenticator
+      - export PATH=$PWD/:$PATH
+      - apt-get update && apt-get -y install jq python3-pip python3-dev && pip3 install --upgrade awscli
+
+  pre_build:
+    commands:
+      - TAG="$(date +%Y-%m-%d.%H.%M.%S).$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | head -c 8)"
+      - echo "updating image details to the deployment file"
+      - sed -i 's@CONTAINER_IMAGE@'"$REPOSITORY_URIONE:$TAG"'@' ./manifests/api-deploy.yml
+      - sed -i 's@CONTAINER_IMAGE@'"$REPOSITORY_URITWO:$TAG"'@' ./manifests/web-deploy.yml
+      - export KUBECONFIG=$HOME/.kube/config
+      - echo "Displaying files in the source directory for reference"
+      - ls -l $CODEBUILD_SRC_DIR
+
+  build:
+    commands:
+      - cd api
+      - docker build . -t $REPOSITORY_URIONE:$TAG
+      - docker tag $REPOSITORY_URIONE:$TAG $REPOSITORY_URIONE:latest
+      - cd ../web
+      - docker build . -t $REPOSITORY_URITWO:$TAG
+      - docker tag $REPOSITORY_URITWO:$TAG $REPOSITORY_URITWO:latest
+
+  post_build:
+    commands:
+      - echo "Logging into ecr repository"
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+      - docker push $REPOSITORY_URIONE:$TAG
+      - docker push $REPOSITORY_URIONE:latest
+      - docker push $REPOSITORY_URITWO:$TAG
+      - docker push $REPOSITORY_URITWO:latest
+##      - echo "Following command will update the $EKS_CLUSTER_NAME cluster info to kube config file"
+##      - aws eks update-kubeconfig --region $AWS_REGION --name $EKS_CLUSTER_NAME
+      - kubectl apply -f manifests/secret.yml -f manifests/postgres-aws.yml
+      - kubectl apply -f manifests/api-svc.yml -f manifests/web-svc.yml -f manifests/api-deploy.yml -f manifests/web-deploy.yml
+...

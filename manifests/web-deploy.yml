@@ -5,6 +5,7 @@ metadata:
 
 spec:
   replicas: 1
+  minReadySeconds: 5
   selector:
     matchLabels:
       app: web
@@ -15,9 +16,13 @@ spec:
     spec:
       containers:
         - name: web
-          image: cldops/ntestweb:latest
+          image: CONTAINER_IMAGE
           ports:
             - containerPort: 3000
+          readinessProbe:
+            tcpSocket:
+              port: 3000
+            initialDelaySeconds: 5
           env:
           - name: API_HOST
             value: "http://api:3000"

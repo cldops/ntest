@@ -5,6 +5,7 @@ metadata:
 
 spec:
   replicas: 1
+  minReadySeconds: 5
   selector:
     matchLabels:
       app: api
@@ -15,9 +16,13 @@ spec:
     spec:
       containers:
         - name: api
-          image: cldops/ntestapi:latest
+          image: CONTAINER_IMAGE
           ports:
             - containerPort: 3000
+          readinessProbe:
+            tcpSocket:
+              port: 3000
+            initialDelaySeconds: 5
           env:
           - name: DB
             value: "postgres://postgres:mY_seCret@postgres:5432/postgres"
