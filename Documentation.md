@@ -13,7 +13,7 @@ ASSUMPTIONS:
   - Used GIT so that the code can be reviewed by the panel
   - Used TERRAFORM as it can be used to deploy infra on most cloud solutions
   - Used EKS as the kubernetes manifests can be used on other cloud solutions with minor modifications
-  - EKS cluster has two worker nodes for Highavailability (should have configure three)
+  - EKS cluster has two worker nodes for Highavailability (should have configured three)
   
 TOOLS CONSIDERED BUT NOT USED:
   - Jenkins [Has good plugins base and is not cloud native but wanted to use native AWS services]
